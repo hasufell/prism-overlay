@@ -11,7 +11,7 @@ SRC_URI="http://download.savannah.gnu.org/releases/linphone/belle-sip/${P}.tar.g
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="test"
+IUSE=""
 
 RDEPEND="
 	>=dev-libs/antlr-c-3.4
@@ -22,7 +22,6 @@ DEPEND="${RDEPEND}
 	dev-util/intltool
 	sys-devel/libtool
 	virtual/pkgconfig
-	test? ( dev-util/cunit )
 "
 
 src_prepare() {
@@ -34,6 +33,6 @@ src_prepare() {
 src_configure() {
 	econf \
 		--with-polarssl \
-		$(use_enable test tests)
+		--disable-tests
 }
 
