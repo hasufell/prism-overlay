@@ -35,3 +35,5 @@ git show -q --pretty="format:%h %an %G?" $(git rev-list --first-parent master) |
 https://prism-break.org
 
 https://github.com/urras/gentoo-overlay-tox
+
+https://github.com/gentoo/libressl
