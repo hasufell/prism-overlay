@@ -20,7 +20,7 @@ IUSE="assistant doc gsm-nonstandard gtk ipv6 ldap libnotify ncurses nls sqlite u
 RDEPEND="
 	dev-libs/libxml2
 	dev-libs/openssl:0
-	>=media-libs/mediastreamer-2.10.0[video?,ipv6?]
+	>=media-libs/mediastreamer-2.10.0[video?,ipv6?,upnp?]
 	>=net-libs/belle-sip-1.3.0
 	>=net-libs/libeXosip-4.0.0
 	>=net-libs/libosip-4.0.0
