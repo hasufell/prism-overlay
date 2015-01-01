@@ -14,7 +14,7 @@ Overlay for apps related to secure communication, cryptography and anonymity. Th
 With paludis: see [Paludis repository configuration](http://paludis.exherbo.org/configuration/repositories/index.html)
 
 With layman:
-```layman -f -o https://raw.github.com/hasufell/prism-overlay/master/repository.xml -a prism-overlay```
+```layman -a prism-overlay``` or ```layman -f -o https://raw.github.com/hasufell/prism-overlay/master/repository.xml -a prism-overlay```
 
 ### Signature verification
 
