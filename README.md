@@ -1,6 +1,6 @@
 ### Purpose and scope
 
-Overlay for apps related to secure communication, cryptography and anonymity.
+Overlay for apps related to secure communication, cryptography and anonymity. This overlay may contain libraries.
 
 ### Contributing
 
