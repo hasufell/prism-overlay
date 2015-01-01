@@ -1,0 +1,27 @@
+From 4b27644558ae27d5b97762b4b1c450aaea3bcd18 Mon Sep 17 00:00:00 2001
+From: hasufell <hasufell@gentoo.org>
+Date: Thu, 1 Jan 2015 17:06:27 +0100
+Subject: [PATCH] Avoid dependency on vim-core
+
+---
+ src/Makefile.am | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 5b1b5f1..895fc1c 100755
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -425,8 +425,8 @@ $(GITVERSION_FILE):	make_gitversion_h
+ 
+ yuv2rgb.fs.h: yuv2rgb.fs
+ 	cd $(abs_srcdir) && \
+-	xxd -i yuv2rgb.fs | sed s/}\;/,0x00}\;/ > $(abs_builddir)/yuv2rgb.fs.h
++	xxdi.pl yuv2rgb.fs | sed s/}\;/0x00}\;/ > $(abs_builddir)/yuv2rgb.fs.h
+ 
+ yuv2rgb.vs.h: yuv2rgb.vs
+ 	cd $(abs_srcdir) && \
+-	xxd -i yuv2rgb.vs | sed s/}\;/,0x00}\;/ > $(abs_builddir)/yuv2rgb.vs.h
++	xxdi.pl yuv2rgb.vs | sed s/}\;/0x00}\;/ > $(abs_builddir)/yuv2rgb.vs.h
+-- 
+2.2.1
+
