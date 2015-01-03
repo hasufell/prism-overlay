@@ -13,5 +13,8 @@
 		<flag name='kde'>Enable support for KDE, e.g. via
 			<pkg>kde-base/kwalletd</pkg>. This does not control the gui!
 		</flag>
+		<flag name='udev'>Whether udev will be consulted when deciding
+			if a volume is system or not.
+		</flag>
 	</use>
 </pkgmetadata>
