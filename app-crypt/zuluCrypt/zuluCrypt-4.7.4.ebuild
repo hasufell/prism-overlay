@@ -7,7 +7,7 @@ EAPI=5
 inherit multilib cmake-utils
 
 DESCRIPTION="Front end to cryptsetup"
-HOMEPAGE="https://code.google.com/p/zulucrypt"
+HOMEPAGE="https://github.com/mhogomchungu/zuluCrypt https://code.google.com/p/zulucrypt"
 SRC_URI="https://github.com/mhogomchungu/zuluCrypt/releases/download/${PV}/zuluCrypt-${PV}.tar.bz2"
 
 LICENSE="GPL-2+"
