@@ -13,7 +13,7 @@ SRC_URI="http://polarssl.org/download/${P}-gpl.tgz"
 LICENSE="GPL-2"
 SLOT="0/7"
 KEYWORDS="~alpha ~amd64 ~arm ~hppa ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86 ~amd64-fbsd ~x86-fbsd"
-IUSE="doc havege programs sse2 static-libs test threads zlib"
+IUSE="cpu_flags_x86_sse2 doc havege programs static-libs test threads zlib"
 
 RDEPEND="
 	programs? ( dev-libs/openssl:0 )
@@ -31,7 +31,7 @@ enable_polarssl_option() {
 }
 
 src_prepare() {
-	use sse2 && enable_polarssl_option POLARSSL_HAVE_SSE2
+	use cpu_flags_x86_sse2 && enable_polarssl_option POLARSSL_HAVE_SSE2
 	use zlib && enable_polarssl_option POLARSSL_ZLIB_SUPPORT
 	use havege && enable_polarssl_option POLARSSL_HAVEGE_C
 	use threads && enable_polarssl_option POLARSSL_THREADING_C
