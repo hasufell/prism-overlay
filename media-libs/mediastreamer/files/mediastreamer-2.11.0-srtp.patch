@@ -1,0 +1,24 @@
+--- src/crypto/ms_srtp.c
++++ src/crypto/ms_srtp.c
+@@ -510,6 +510,21 @@
+ 
+ typedef void* srtp_t;
+ typedef int err_status_t;
++typedef struct _MSSrtpStreamContext {
++	srtp_t srtp;
++	RtpTransportModifier *modifier;
++	bool_t secured;
++	bool_t mandatory_enabled;
++	bool_t is_rtp;
++	ms_mutex_t mutex;
++
++} MSSrtpStreamContext;
++struct _MSSrtpCtx {
++	MSSrtpStreamContext send_rtp_context;
++	MSSrtpStreamContext send_rtcp_context;
++	MSSrtpStreamContext recv_rtp_context;
++	MSSrtpStreamContext recv_rtcp_context;
++};
+ 
+ bool_t ms_srtp_supported(void){
+ 	return FALSE;
