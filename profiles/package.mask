@@ -1,0 +1,5 @@
+# compiles, but crashes with double-free
+>=net-voip/linphone-3.8.0
+>=media-libs/mediastreamer-2.11.0
+>=net-libs/ortp-0.24.0
+>=net-libs/belle-sip-1.4.0
