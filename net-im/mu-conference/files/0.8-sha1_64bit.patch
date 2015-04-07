@@ -1,0 +1,32 @@
+diff -pubr jabber-muc-0.8.orig/include/lib.h jabber-muc-0.8/include/lib.h
+--- jabber-muc-0.8.orig/include/lib.h	2009-03-20 09:01:51.000000000 +0000
++++ jabber-muc-0.8/include/lib.h	2010-07-08 15:31:19.000000000 +0100
+@@ -112,13 +112,6 @@ int j_atoi(const char *a, int def); /* c
+ /* SHA calculations                                          */
+ /*                                                           */
+ /* --------------------------------------------------------- */
+-#if (SIZEOF_INT == 4)
+-typedef unsigned int uint32;
+-#elif (SIZEOF_SHORT == 4)
+-typedef unsigned short uint32;
+-#else
+-typedef unsigned int uint32;
+-#endif /* HAVEUINT32 */
+ 
+ char *shahash(char *str);	/* NOT THREAD SAFE */
+ void shahash_r(const char* str, char hashbuf[40]); /* USE ME */
+@@ -299,10 +292,11 @@ char *xstream_header_char(xmlnode x);
+ 
+ 
+ typedef struct {
+-  unsigned long H[5];
+-  unsigned long W[80];
++  guint32 H[5];
++  guint32 W[80];
+   int lenW;
+-  unsigned long sizeHi,sizeLo;
++  guint32 sizeHi;
++  guint32 sizeLo;
+ } j_SHA_CTX;
+ 
+ 
