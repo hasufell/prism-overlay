@@ -7,7 +7,7 @@ EAPI=5
 inherit multilib cmake-utils
 
 DESCRIPTION="Front end to cryptsetup"
-HOMEPAGE="https://github.com/mhogomchungu/zuluCrypt https://code.google.com/p/zulucrypt"
+HOMEPAGE="http://mhogomchungu.github.io/zuluCrypt/"
 SRC_URI="https://github.com/mhogomchungu/zuluCrypt/releases/download/${PV}/zuluCrypt-${PV}.tar.bz2"
 
 LICENSE="GPL-2+"
@@ -15,7 +15,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE="gnome +gui kde udev"
 
-RDEPEND="
+CDEPEND="
 	dev-libs/libgcrypt:0
 	sys-apps/util-linux
 	sys-fs/cryptsetup
@@ -29,9 +29,10 @@ RDEPEND="
 			kde-base/kwalletd:4
 		)
 	)
-	udev? ( virtual/udev )
 "
-DEPEND="${RDEPEND}
+RDEPEND="${CDEPEND}
+	udev? ( virtual/udev )"
+DEPEND="${CDEPEND}
 	virtual/pkgconfig
 "
 
