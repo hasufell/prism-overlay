@@ -27,12 +27,19 @@ src_prepare() {
 }
 
 multilib_src_compile() {
-	CFLAGS="${CFLAGS}" emake CC="$(tc-getCC)" $(usex static-libs "libntru.a libntru.so" "")
+	CFLAGS="${CFLAGS}" \
+		emake \
+			CC="$(tc-getCC)" \
+			$(usex static-libs "libntru.a libntru.so" "") \
+			MACHINE="$(if [[ ${ABI} == x86 ]] ; then echo i386 ; else echo x86_64 ; fi)"
 }
 
 src_test() {
 	_test() {
-		CFLAGS="${CFLAGS}" emake CC="$(tc-getCC)" test -j1 -C "${BUILD_DIR}-test"
+		CFLAGS="${CFLAGS}" \
+			emake CC="$(tc-getCC)" test -j1 -C "${BUILD_DIR}-test" \
+				MACHINE="$(if [[ ${ABI} == x86 ]] ; then echo i386 ; else echo x86_64 ; fi)"
+
 	}
 
 	multilib_foreach_abi _test
@@ -43,6 +50,7 @@ multilib_src_install() {
 		DESTDIR="${ED}" \
 		INST_LIBDIR="/usr/$(get_libdir)" \
 		INST_DOCDIR="/usr/share/doc/${PF}" \
+		MACHINE="$(if [[ ${ABI} == x86 ]] ; then echo i386 ; else echo x86_64 ; fi)" \
 		install $(usex static-libs install-static-lib "")
 }
 
