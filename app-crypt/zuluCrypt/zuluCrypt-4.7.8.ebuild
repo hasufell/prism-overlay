@@ -22,8 +22,8 @@ CDEPEND="
 	gnome? ( app-crypt/libsecret )
 	gui? (
 		dev-libs/libpwquality
-		dev-qt/qtcore:4
-		dev-qt/qtgui:4
+		>=dev-qt/qtcore-4.8.7:4
+		>=dev-qt/qtgui-4.8.7:4
 		kde? (
 			kde-base/kdelibs:4
 			kde-apps/kwalletd:4
