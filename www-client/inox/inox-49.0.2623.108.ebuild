@@ -19,7 +19,7 @@ SRC_URI="https://commondatastorage.googleapis.com/chromium-browser-official/chro
 # inox patchset is GPL-3
 LICENSE="BSD hotwording? ( no-source-code ) GPL-3"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~x86"
 IUSE="custom-cflags cups gn gnome gnome-keyring gtk3 hidpi hotwording kerberos neon pic +proprietary-codecs pulseaudio selinux +system-ffmpeg +tcmalloc widevine"
 RESTRICT="!system-ffmpeg? ( proprietary-codecs? ( bindist ) )"
 
@@ -80,7 +80,6 @@ RDEPEND="
 		>=dev-libs/libevent-1.4.13:=
 		dev-libs/libxml2:=[icu]
 		dev-libs/libxslt:=
-		dev-libs/re2:=
 		media-libs/flac:=
 		>=media-libs/harfbuzz-0.9.41:=[icu(+)]
 		>=media-libs/libjpeg-turbo-1.2.0-r1:=
@@ -123,12 +122,12 @@ DEPEND+=" $(python_gen_any_dep '
 	dev-python/simplejson[${PYTHON_USEDEP}]
 ')"
 python_check_deps() {
-	has_version "dev-python/beautifulsoup:python-2[${PYTHON_USEDEP}]" && \
-		has_version "dev-python/beautifulsoup:4[${PYTHON_USEDEP}]" && \
-		has_version "dev-python/html5lib[${PYTHON_USEDEP}]" && \
-		has_version "dev-python/jinja[${PYTHON_USEDEP}]" && \
-		has_version "dev-python/ply[${PYTHON_USEDEP}]" && \
-		has_version "dev-python/simplejson[${PYTHON_USEDEP}]"
+	has_version --host-root "dev-python/beautifulsoup:python-2[${PYTHON_USEDEP}]" &&
+	has_version --host-root "dev-python/beautifulsoup:4[${PYTHON_USEDEP}]" &&
+	has_version --host-root "dev-python/html5lib[${PYTHON_USEDEP}]" &&
+	has_version --host-root "dev-python/jinja[${PYTHON_USEDEP}]" &&
+	has_version --host-root "dev-python/ply[${PYTHON_USEDEP}]" &&
+	has_version --host-root "dev-python/simplejson[${PYTHON_USEDEP}]"
 }
 
 if ! has chromium_pkg_die ${EBUILD_DEATH_HOOKS}; then
@@ -193,12 +192,13 @@ pkg_setup() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}/chromium-system-ffmpeg-r1.patch"
+	epatch "${FILESDIR}/chromium-system-ffmpeg-r2.patch"
 	epatch "${FILESDIR}/chromium-system-jinja-r7.patch"
 	epatch "${FILESDIR}/chromium-widevine-r1.patch"
 	epatch "${FILESDIR}/chromium-last-commit-position-r0.patch"
-	epatch "${FILESDIR}/chromium-snapshot-toolchain-r0.patch"
-	epatch "${FILESDIR}/chromium-system-icu-r0.patch"
+	epatch "${FILESDIR}/chromium-snapshot-toolchain-r1.patch"
+	epatch "${FILESDIR}/chromium-whitelist-arm64-syscalls.patch"
+	epatch "${FILESDIR}/chromium-arm64-align-stack-16-bytes.patch"
 
 	# inox patches
 	EPATCH_SUFFIX="patch" \
@@ -213,20 +213,19 @@ src_prepare() {
 	fi
 	if use gn; then
 		conditional_bundled_libraries+="
+			base/third_party/libevent
 			third_party/adobe
 			third_party/ffmpeg
 			third_party/flac
 			third_party/harfbuzz-ng
 			third_party/icu
 			third_party/jinja2
-			third_party/libevent
 			third_party/libjpeg_turbo
 			third_party/libpng
 			third_party/libwebp
 			third_party/libxml
 			third_party/libxslt
 			third_party/markupsafe
-			third_party/re2
 			third_party/snappy
 			third_party/speech-dispatcher
 			third_party/usb_ids
@@ -258,6 +257,8 @@ src_prepare() {
 		'third_party/analytics' \
 		'third_party/angle' \
 		'third_party/angle/src/third_party/compiler' \
+		'third_party/angle/src/third_party/murmurhash' \
+		'third_party/angle/src/third_party/trace_event' \
 		'third_party/boringssl' \
 		'third_party/brotli' \
 		'third_party/cacheinvalidation' \
@@ -320,6 +321,7 @@ src_prepare() {
 		'third_party/polymer' \
 		'third_party/protobuf' \
 		'third_party/qcms' \
+		'third_party/re2' \
 		'third_party/sfntly' \
 		'third_party/skia' \
 		'third_party/smhasher' \
@@ -330,6 +332,7 @@ src_prepare() {
 		'third_party/webdriver' \
 		'third_party/webrtc' \
 		'third_party/widevine' \
+		'third_party/woff2' \
 		'third_party/x86inc' \
 		'third_party/zlib/google' \
 		'url/third_party/mozilla' \
@@ -364,6 +367,7 @@ src_configure() {
 	# TODO: use_system_libvpx (http://crbug.com/494939).
 	# TODO: use_system_opus (https://code.google.com/p/webrtc/issues/detail?id=3077).
 	# TODO: use_system_protobuf (bug #525560).
+	# TODO: use_system_re2 (bug #571156).
 	# TODO: use_system_ssl (http://crbug.com/58087).
 	# TODO: use_system_sqlite (http://crbug.com/22208).
 	myconf_gyp+="
@@ -381,7 +385,6 @@ src_configure() {
 		-Duse_system_libxslt=1
 		-Duse_system_minizip=1
 		-Duse_system_nspr=1
-		-Duse_system_re2=1
 		-Duse_system_snappy=1
 		-Duse_system_speex=1
 		-Duse_system_xdg_utils=1
@@ -458,7 +461,9 @@ src_configure() {
 		-Dhost_clang=0
 		-Dlinux_use_bundled_binutils=0
 		-Dlinux_use_bundled_gold=0
-		-Dlinux_use_gold_flags=0"
+		-Dlinux_use_gold_flags=0
+		-Dsysroot="
+	myconf_gn+=" use_sysroot=false"
 
 	ffmpeg_branding="$(usex proprietary-codecs Chrome Chromium)"
 	myconf_gyp+=" -Dproprietary_codecs=1 -Dffmpeg_branding=${ffmpeg_branding}"
@@ -478,6 +483,9 @@ src_configure() {
 	elif [[ $myarch = x86 ]] ; then
 		target_arch=ia32
 		ffmpeg_target_arch=ia32
+	elif [[ $myarch = arm64 ]] ; then
+		target_arch=arm64
+		ffmpeg_target_arch=arm64
 	elif [[ $myarch = arm ]] ; then
 		target_arch=arm
 		ffmpeg_target_arch=$(usex neon arm-neon arm)
