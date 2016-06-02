@@ -5,7 +5,7 @@
 EAPI="5"
 PYTHON_COMPAT=( python2_7 )
 
-CHROMIUM_LANGS="am ar bg bn ca cs da de el en_GB es es_LA et fa fi fil fr gu he
+CHROMIUM_LANGS="am ar bg bn ca cs da de el en_GB es es_419 et fa fi fil fr gu he
 	hi hr hu id it ja kn ko lt lv ml mr ms nb nl pl pt_BR pt_PT ro ru sk sl sr
 	sv sw ta te th tr uk vi zh_CN zh_TW"
 
@@ -76,7 +76,6 @@ RDEPEND="
 	!gn? (
 		>=app-accessibility/speech-dispatcher-0.8:=
 		app-arch/snappy:=
-		>=dev-libs/icu-55.1:=
 		>=dev-libs/libevent-1.4.13:=
 		dev-libs/libxml2:=[icu]
 		dev-libs/libxslt:=
@@ -192,18 +191,17 @@ pkg_setup() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}/chromium-system-ffmpeg-r2.patch"
-	epatch "${FILESDIR}/chromium-system-jinja-r7.patch"
+	epatch "${FILESDIR}/chromium-system-ffmpeg-r3.patch"
+	epatch "${FILESDIR}/chromium-system-jinja-r8.patch"
 	epatch "${FILESDIR}/chromium-widevine-r1.patch"
 	epatch "${FILESDIR}/chromium-last-commit-position-r0.patch"
 	epatch "${FILESDIR}/chromium-snapshot-toolchain-r1.patch"
 	epatch "${FILESDIR}/chromium-whitelist-arm64-syscalls.patch"
-	epatch "${FILESDIR}/chromium-arm64-align-stack-16-bytes.patch"
 
 	# inox patches
 	EPATCH_SUFFIX="patch" \
 	EPATCH_FORCE="yes" \
-	epatch "${FILESDIR}/inox"
+	epatch "${FILESDIR}/inox-50"
 
 	epatch_user
 
@@ -283,6 +281,7 @@ src_prepare() {
 		'third_party/google_input_tools/third_party/closure_library/third_party/closure' \
 		'third_party/hunspell' \
 		'third_party/iccjpeg' \
+		'third_party/icu' \
 		'third_party/jstemplate' \
 		'third_party/khronos' \
 		'third_party/leveldatabase' \
@@ -303,9 +302,9 @@ src_prepare() {
 		'third_party/lzma_sdk' \
 		'third_party/mesa' \
 		'third_party/modp_b64' \
-		'third_party/mojo' \
 		'third_party/mt19937ar' \
 		'third_party/npapi' \
+		'third_party/openh264' \
 		'third_party/openmax_dl' \
 		'third_party/opus' \
 		'third_party/ots' \
@@ -362,6 +361,7 @@ src_configure() {
 
 	# Use system-provided libraries.
 	# TODO: use_system_hunspell (upstream changes needed).
+	# TODO: use_system_icu (bug #576370).
 	# TODO: use_system_libsrtp (bug #459932).
 	# TODO: use_system_libusb (http://crbug.com/266149).
 	# TODO: use_system_libvpx (http://crbug.com/494939).
@@ -375,7 +375,6 @@ src_configure() {
 		-Duse_system_ffmpeg=$(usex system-ffmpeg 1 0)
 		-Duse_system_flac=1
 		-Duse_system_harfbuzz=1
-		-Duse_system_icu=1
 		-Duse_system_jsoncpp=1
 		-Duse_system_libevent=1
 		-Duse_system_libjpeg=1
@@ -405,7 +404,7 @@ src_configure() {
 		"
 
 	# Needed for system icu - we don't need additional data files.
-	myconf_gyp+=" -Dicu_use_data_file_flag=0"
+	# myconf_gyp+=" -Dicu_use_data_file_flag=0"
 
 	# TODO: patch gyp so that this arm conditional is not needed.
 	if ! use arm; then
@@ -665,9 +664,7 @@ src_install() {
 	doins out/Release/*.bin || die
 	doins out/Release/*.pak || die
 
-	if use gn; then
-		doins out/Release/icudtl.dat || die
-	fi
+	doins out/Release/icudtl.dat || die
 
 	doins -r out/Release/locales || die
 	doins -r out/Release/resources || die
