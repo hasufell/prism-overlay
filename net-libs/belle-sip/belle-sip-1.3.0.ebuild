@@ -35,4 +35,3 @@ src_configure() {
 		--with-polarssl \
 		--disable-tests
 }
-

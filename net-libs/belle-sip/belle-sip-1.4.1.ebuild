@@ -30,4 +30,3 @@ src_configure() {
 		--disable-tests \
 		--disable-strict
 }
-

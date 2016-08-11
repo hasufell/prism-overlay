@@ -7,15 +7,13 @@ EAPI=6
 MY_P="monitor"
 
 DESCRIPTION="Monitoring application for www-servers/hiawatha"
-HOMEPAGE="http://www.hiawatha-webserver.org/howto/monitor"
-SRC_URI="http://www.hiawatha-webserver.org/files/${MY_P}-${PV}.tar.gz "
+HOMEPAGE="https://www.hiawatha-webserver.org/howto/monitor"
+SRC_URI="https://www.hiawatha-webserver.org/files/${MY_P}-${PV}.tar.gz "
 
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="amd64 ~x86"
 IUSE=""
-
-
 
 S=${WORKDIR}/${MY_P}
 
