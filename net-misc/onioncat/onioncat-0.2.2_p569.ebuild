@@ -27,7 +27,7 @@ src_prepare() {
 
 src_install() {
 	default
-	newinitd "${FILESDIR}"/onioncat.initd onioncat
+	newinitd "${FILESDIR}"/onioncat.initd-r1 onioncat
 	newconfd "${FILESDIR}"/onioncat.confd onioncat
 	insinto /var/lib/tor
 	doins glob_id.txt hosts.onioncat
