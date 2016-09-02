@@ -16,14 +16,14 @@ HOMEPAGE="http://chromium.org/"
 SRC_URI="https://commondatastorage.googleapis.com/chromium-browser-official/chromium-${PV}.tar.xz"
 
 # inox patchset is GPL-3
-LICENSE="BSD hotwording? ( no-source-code ) GPL-3"
+LICENSE="BSD GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~arm ~arm64 ~x86"
-IUSE="custom-cflags cups gn gnome gnome-keyring gtk3 hidpi hotwording kerberos neon pic +proprietary-codecs pulseaudio selinux +system-ffmpeg +tcmalloc widevine"
+IUSE="custom-cflags cups gn gnome gnome-keyring gtk3 kerberos neon pic +proprietary-codecs pulseaudio selinux +system-ffmpeg +tcmalloc widevine"
 RESTRICT="!system-ffmpeg? ( proprietary-codecs? ( bindist ) )"
 
 # TODO: bootstrapped gn binary hangs when using tcmalloc with portage's sandbox.
-REQUIRED_USE="gn? ( !tcmalloc )"
+REQUIRED_USE="gn? ( gnome gnome-keyring !tcmalloc )"
 
 # Native Client binaries are compiled with different set of flags, bug #452066.
 QA_FLAGS_IGNORED=".*\.nexe"
@@ -85,6 +85,7 @@ RDEPEND="
 		sys-libs/zlib:=[minizip]
 	)"
 DEPEND="${RDEPEND}
+	>=app-arch/gzip-1.7
 	!arm? (
 		dev-lang/yasm
 	)
@@ -158,7 +159,7 @@ For other desktop environments, try one of the following:
 S=${WORKDIR}/chromium-${PV}
 
 pkg_pretend() {
-	if [[ $(tc-getCC)$ == *gcc* ]] && \
+	if [[ $(tc-getCC) == *gcc* ]] && \
 		[[ $(gcc-major-version)$(gcc-minor-version) -lt 48 ]]; then
 		die 'At least gcc 4.8 is required, see bugs: #535730, #525374, #518668.'
 	fi
@@ -190,14 +191,10 @@ pkg_setup() {
 
 src_prepare() {
 	epatch "${FILESDIR}/chromium-system-ffmpeg-r2.patch"
-	epatch "${FILESDIR}/chromium-system-jinja-r9.patch"
+	epatch "${FILESDIR}/chromium-system-jinja-r11.patch"
 	epatch "${FILESDIR}/chromium-widevine-r1.patch"
 	epatch "${FILESDIR}/chromium-last-commit-position-r0.patch"
-	epatch "${FILESDIR}/chromium-snapshot-toolchain-r1.patch"
-	epatch "${FILESDIR}/chromium-pdfium-r0.patch"
 	epatch "${FILESDIR}/chromium-system-zlib-r0.patch"
-	epatch "${FILESDIR}/chromium-linker-warnings-r0.patch"
-	epatch "${FILESDIR}/chromium-ffmpeg-license-r0.patch"
 
 	# inox patches
 	EPATCH_SUFFIX="patch" \
@@ -241,6 +238,7 @@ src_prepare() {
 		'third_party/WebKit' \
 		'third_party/analytics' \
 		'third_party/angle' \
+		'third_party/angle/src/common/third_party/numerics' \
 		'third_party/angle/src/third_party/compiler' \
 		'third_party/angle/src/third_party/libXNVCtrl' \
 		'third_party/angle/src/third_party/murmurhash' \
@@ -256,6 +254,7 @@ src_prepare() {
 		'third_party/catapult/tracing/third_party/d3' \
 		'third_party/catapult/tracing/third_party/gl-matrix' \
 		'third_party/catapult/tracing/third_party/jszip' \
+		'third_party/catapult/tracing/third_party/mannwhitneyu' \
 		'third_party/cld_2' \
 		'third_party/cros_system_api' \
 		'third_party/cython/python_flags.py' \
@@ -426,16 +425,19 @@ src_configure() {
 		$(gyp_use gnome-keyring use_gnome_keyring)
 		$(gyp_use gnome-keyring linux_link_gnome_keyring)
 		$(gyp_use gtk3)
-		$(gyp_use hidpi enable_hidpi)
-		$(gyp_use hotwording enable_hotwording)
 		$(gyp_use kerberos)
 		$(gyp_use pulseaudio)
 		$(gyp_use tcmalloc use_allocator tcmalloc none)
 		$(gyp_use widevine enable_widevine)"
 
+	# TODO: support USE=gnome-keyring for GN
+	myconf_gn+=" enable_widevine=$(usex widevine true false)"
 	myconf_gn+=" use_allocator=$(usex tcmalloc \"tcmalloc\" \"none\")"
 	myconf_gn+=" use_cups=$(usex cups true false)"
+	myconf_gn+=" use_gconf=$(usex gnome true false)"
+	myconf_gn+=" use_gtk3=$(usex gtk3 true false)"
 	myconf_gn+=" use_kerberos=$(usex kerberos true false)"
+	myconf_gn+=" use_pulseaudio=$(usex pulseaudio true false)"
 
 	# Use explicit library dependencies instead of dlopen.
 	# This makes breakages easier to detect by revdep-rebuild.
@@ -445,17 +447,18 @@ src_configure() {
 		-Dlinux_link_libspeechd=1
 		-Dlibspeechd_h_prefix=speech-dispatcher/"
 
+	# TODO: link_pulseaudio=true for GN.
+
 	# TODO: use the file at run time instead of effectively compiling it in.
 	myconf_gyp+="
 		-Dusb_ids_path=/usr/share/misc/usb.ids"
 
-	# Save space by removing DLOG and DCHECK messages (about 6% reduction).
-	myconf_gyp+="
-		-Dlogging_like_official_build=1"
+	myconf_gyp+=" -Dfieldtrial_testing_like_official_build=1"
+	myconf_gn+=" fieldtrial_testing_like_official_build=true"
 
 	if [[ $(tc-getCC) == *clang* ]]; then
 		myconf_gyp+=" -Dclang=1"
-		myconf_gn+=" is_clang=true"
+		myconf_gn+=" is_clang=true clang_base_path=\"/usr\" clang_use_chrome_plugins=false"
 	else
 		myconf_gyp+=" -Dclang=0"
 		myconf_gn+=" is_clang=false"
@@ -534,6 +537,7 @@ src_configure() {
 
 	# Disable fatal linker warnings, bug 506268.
 	myconf_gyp+=" -Ddisable_fatal_linker_warnings=1"
+	myconf_gn+=" fatal_linker_warnings=false"
 
 	# Avoid CFLAGS problems, bug #352457, bug #390147.
 	if ! use custom-cflags; then
@@ -616,11 +620,9 @@ eninja() {
 src_compile() {
 	local ninja_targets="chrome chrome_sandbox chromedriver"
 
-	if ! use gn; then
-		# Build mksnapshot and pax-mark it.
-		eninja -C out/Release mksnapshot || die
-		pax-mark m out/Release/mksnapshot
-	fi
+	# Build mksnapshot and pax-mark it.
+	eninja -C out/Release mksnapshot || die
+	pax-mark m out/Release/mksnapshot
 
 	# Even though ninja autodetects number of CPUs, we respect
 	# user's options, for debugging with -j 1 or any other reason.
