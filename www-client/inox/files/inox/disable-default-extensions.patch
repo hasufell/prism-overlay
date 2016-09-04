@@ -1,5 +1,5 @@
---- ./chrome/browser/extensions/external_component_loader.cc	2016-09-02 19:51:43.822100907 +0900
-+++ ./chrome/browser/extensions/external_component_loader.cc.new	2016-09-02 20:09:41.344150879 +0900
+--- ./chrome/browser/extensions/external_component_loader.cc
++++ ./chrome/browser/extensions/external_component_loader.cc.new
 @@ -39,10 +39,6 @@
  
  void ExternalComponentLoader::StartLoading() {
@@ -29,8 +29,8 @@
    LoadFinished();
  }
  
---- ./chrome/browser/extensions/component_loader.cc	2016-09-02 19:51:43.789101609 +0900
-+++ ./chrome/browser/extensions/component_loader.cc.new	2016-09-02 20:21:02.517639375 +0900
+--- ./chrome/browser/extensions/component_loader.cc
++++ ./chrome/browser/extensions/component_loader.cc.new
 @@ -340,24 +340,12 @@
  }
  
