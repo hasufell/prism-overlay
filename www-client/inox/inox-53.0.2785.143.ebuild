@@ -378,11 +378,18 @@ src_configure() {
 		-Duse_system_snappy=1
 		-Duse_system_speex=1
 		-Duse_system_xdg_utils=1
-		-Duse_system_zlib=1
+		-Duse_system_zlib=1"
+
+	# Inox
+	myconf_gyp+="
+		-Dlinux_strip_binary=1
+		-Duse_mojo=0
+		-Duse_sysroot=0
+		-Ddisable_fatal_linker_warnings=1
+		-Ddisable_glibc=1
 		-Denable_webrtc=0
 		-Denable_google_now=0
-		-Denable_remoting=0
-		-Dsafe_browsing_mode=0
+		-Dremoting=0
 		-Denable_rlz=0
 		-Denable_hangout_services_extension=0
 		-Dbranding=Chromium
