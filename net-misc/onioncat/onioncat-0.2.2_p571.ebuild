@@ -14,7 +14,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-RDEPEND="net-misc/tor"
+RDEPEND="net-vpn/tor"
 
 S=${WORKDIR}/${MY_P}
 
